@@ -1,7 +1,7 @@
 {
   "name": "utoble",
   "version": "0.0.1",
-  "description": "",
+  "description": "utoble",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"

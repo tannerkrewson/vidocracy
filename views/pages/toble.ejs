@@ -12,12 +12,16 @@
   </br></br></br>
     <div class="row">
       <div id="subtitle" style="text-align:center">
-        <h1><%= code%>'s toble</h1>
+        <h1>Your Toble</h1>
+        <h3>Toble Code: <%= code%></h3>
       </div></br>
       <div class="col-md-6">
         <div class="list-group">
-          <div class="list-group-item active" id="searchitem">
-            <input type="text" id="search" class="form-control" placeholder="🔍      Search for a video or song..." />
+          <div class="list-group-item active"  id="searchitem">
+            <div class="glyphicon glyphicon glyphicon-search"></div>
+            <div style="display: inline-block">
+              <input type="text" id="search" class="form-control" placeholder="Search for a video or song..." />
+            </div>
           </div>
           <a href="#" class="list-group-item">
             The Beatles - Dear Prudence
@@ -31,21 +35,28 @@
             Now Playing: Radiohead - Present Tense
             <span class="badge">2</span>
           </div>
-          <div class="list-group-item">
+          <div class="list-group-item clearfix">
+            <a href="#" class="icon" style="margin-right: 12px">
+              <span class="glyphicon glyphicon-arrow-up"></span>
+            </a>
+            </span>
             The Beatles - Sexy Sadie
             <span class="badge">4</span>
           </div>
           <div class="list-group-item">
             Pixies - Here Comes Your Man
             <span class="badge">2</span>
+            <span class="glyphicon glyphicon-heart-empty" aria-hidden="true"></span>
           </div>
           <div class="list-group-item">
             Weezer - Buddy Holly
             <span class="badge">1</span>
+            <span class="glyphicon glyphicon-heart-empty" aria-hidden="true"></span>
           </div>
           <div class="list-group-item">
             Adele - Hello
             <span class="badge">1</span>
+            <span class="glyphicon glyphicon-heart-empty" aria-hidden="true"></span>
           </div>
         </div>
       </div>
