@@ -11,86 +11,76 @@
   <div class="container">
   </br></br></br>
     <div class="row">
-      <div id="subtitle" style="text-align:center">
+      <div id="subtitle">
         <h1>Your Toble</h1>
         <h3>Toble Code: <%= code%></h3>
       </div></br>
       <div class="col-md-6">
         <div class="list-group">
-          <div class="list-group-item active"  id="searchitem">
-            <div class="glyphicon glyphicon glyphicon-search"></div>
-            <div style="display: inline-block">
-              <input type="text" id="search" class="form-control" placeholder="Search for a video or song..." />
-            </div>
+          <div class="list-group-item active" id="search">
+            <table>
+              <tr>
+                <td><i class="glyphicon glyphicon-search"></i></td>
+                <td><input type="text" class="form-control" placeholder="Search for a video or song..." /></td> 
+              </tr>
+            </table>
           </div>
           <a href="#" class="list-group-item">
             The Beatles - Dear Prudence
+            <button type="button" class="btn btn-sm add btn-primary">
+               Add
+            </button>
           </a>
         </div>
       </div>
 
       <div class="col-md-6">
         <div class="list-group">
-          <div class="list-group-item active">
-            Now Playing: Radiohead - Present Tense
+          <div class="list-group-item active" id="nowplaying">
             <span class="badge">2</span>
+            <table style="width: auto;">
+              <tr>
+                <td><i class="glyphicon glyphicon-play"></i></td>
+                <td>Now Playing: Radiohead - Present Tense</td>
+                <td></td>
+              </tr>
+            </table>
           </div>
           <div class="list-group-item clearfix">
-            <a href="#" class="icon" style="margin-right: 12px">
-              <span class="glyphicon glyphicon-arrow-up"></span>
-            </a>
-            </span>
             The Beatles - Sexy Sadie
+            <button type="button" class="btn btn-sm upvote btn-primary">
+               Upvote
+            </button>
             <span class="badge">4</span>
           </div>
           <div class="list-group-item">
             Pixies - Here Comes Your Man
             <span class="badge">2</span>
-            <span class="glyphicon glyphicon-heart-empty" aria-hidden="true"></span>
+            <button type="button" class="btn btn-sm upvote btn-info">
+               Upvoted
+            </button>
           </div>
           <div class="list-group-item">
             Weezer - Buddy Holly
             <span class="badge">1</span>
-            <span class="glyphicon glyphicon-heart-empty" aria-hidden="true"></span>
+            <button type="button" class="btn btn-sm upvote btn-primary">
+               Upvote
+            </button>
           </div>
           <div class="list-group-item">
             Adele - Hello
             <span class="badge">1</span>
-            <span class="glyphicon glyphicon-heart-empty" aria-hidden="true"></span>
+            <button type="button" class="btn btn-sm upvote btn-primary">
+               Upvote
+            </button>
           </div>
         </div>
       </div>
     </div>
   </div> <!-- /container -->
 
-  <style>
-    #search {
-      background-color:transparent !important;
-      outline: none;
-      border: none !important;
-      -webkit-box-shadow: none !important;
-      -moz-box-shadow: none !important;
-      box-shadow: none !important;
-      color: white;
-    }
-    input::-webkit-input-placeholder {
-      color: white !important;
-    }
-     
-    input:-moz-placeholder { /* Firefox 18- */
-      color: white !important;  
-    }
-     
-    input::-moz-placeholder {  /* Firefox 19+ */
-      color: white !important;  
-    }
-     
-    input:-ms-input-placeholder {  
-      color: white !important;  
-    }
-  </style>
-
-  <% include ../partials/footer.ejs %>
+<% include ../partials/footer.ejs %>
+<link rel="stylesheet" type="text/css" href="/css/toble.css" />
 
 </body>
 </html>

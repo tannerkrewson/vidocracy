@@ -1,0 +1,65 @@
+table {
+  width: 100%;
+}
+
+.upvote {
+  position: absolute;
+  right: 50px;
+  bottom: 4px;
+}
+
+.add {
+  position: absolute;
+  bottom: 4px;
+  right: 15px;
+}
+
+#nowplaying .glyphicon {
+  width: 14px;
+  padding-right: 27px;
+}
+
+#search {
+  padding-top: 14px;
+  padding-bottom: 14px;
+}
+
+#search .glyphicon {
+  width: 4px;
+}
+
+#search input {
+  background-color:transparent !important;
+  outline: none;
+  height: 30px;
+  border: none;
+  border-bottom: 1px solid white;
+  border-radius: 2px;
+  -webkit-box-shadow: none !important;
+  -moz-box-shadow: none !important;
+  box-shadow: none !important;
+  color: white;
+}
+
+/* Search box placeholder white text */
+input::-webkit-input-placeholder {
+  color: white !important;
+}
+ 
+input:-moz-placeholder { /* Firefox 18- */
+  color: white !important;  
+}
+ 
+input::-moz-placeholder {  /* Firefox 19+ */
+  color: white !important;  
+}
+ 
+input:-ms-input-placeholder {  
+  color: white !important;  
+}
+
+
+#nowplaying {
+  padding-top: 19px;
+  padding-bottom: 19px;
+}
