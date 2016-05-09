@@ -1,0 +1,23 @@
+{
+  "name": "utoble",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "ejs": "2.3.3",
+    "express": "4.13.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tannerkrewson/utoble"
+  },
+  "author": "Tanner Krewson",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/tannerkrewson/utoble/issues"
+  },
+  "homepage": "https://github.com/tannerkrewson/utoble#readme"
+}

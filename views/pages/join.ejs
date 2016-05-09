@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <% include ../partials/header.ejs %>
+</head>
+
+<body>
+
+  <% include ../partials/nav.ejs %>
+
+  <div class="container">
+  </br></br></br>
+    <div class="row" style="text-align:center">
+
+      <div id="subtitle" style="text-align:center">
+        <h1>Join a Toble</h1>
+      </div>
+
+    <div class="col-sm-4"></div>
+
+    <div class="col-sm-4">
+      </br>
+      <div class="input-group">
+        <input type="text" class="form-control" id="join" placeholder="Enter the toble code">
+        <span class="input-group-btn">
+          <button class="btn btn-default" type="button" onclick="window.location.href = '/toble/' + $( '#join' ).val();">Join</button>
+        </span>
+      </div><!-- /input-group -->
+    </div>
+
+    <div class="col-sm-4"></div>
+
+    </div>
+
+
+
+
+  </br></br></br>
+  </div> <!-- /container -->
+
+  <% include ../partials/footer.ejs %>
+
+</body>
+</html>

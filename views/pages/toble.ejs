@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <% include ../partials/header.ejs %>
+</head>
+
+<body>
+
+  <% include ../partials/nav.ejs %>
+
+  <div class="container">
+  </br></br></br>
+    <div class="row">
+      <div id="subtitle" style="text-align:center">
+        <h1><%= code%>'s toble</h1>
+      </div></br>
+      <div class="col-md-6">
+        <div class="list-group">
+          <div class="list-group-item active" id="searchitem">
+            <input type="text" id="search" class="form-control" placeholder="🔍      Search for a video or song..." />
+          </div>
+          <a href="#" class="list-group-item">
+            The Beatles - Dear Prudence
+          </a>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="list-group">
+          <div class="list-group-item active">
+            Now Playing: Radiohead - Present Tense
+            <span class="badge">2</span>
+          </div>
+          <div class="list-group-item">
+            The Beatles - Sexy Sadie
+            <span class="badge">4</span>
+          </div>
+          <div class="list-group-item">
+            Pixies - Here Comes Your Man
+            <span class="badge">2</span>
+          </div>
+          <div class="list-group-item">
+            Weezer - Buddy Holly
+            <span class="badge">1</span>
+          </div>
+          <div class="list-group-item">
+            Adele - Hello
+            <span class="badge">1</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div> <!-- /container -->
+
+  <style>
+    #search {
+      background-color:transparent !important;
+      outline: none;
+      border: none !important;
+      -webkit-box-shadow: none !important;
+      -moz-box-shadow: none !important;
+      box-shadow: none !important;
+      color: white;
+    }
+    input::-webkit-input-placeholder {
+      color: white !important;
+    }
+     
+    input:-moz-placeholder { /* Firefox 18- */
+      color: white !important;  
+    }
+     
+    input::-moz-placeholder {  /* Firefox 19+ */
+      color: white !important;  
+    }
+     
+    input:-ms-input-placeholder {  
+      color: white !important;  
+    }
+  </style>
+
+  <% include ../partials/footer.ejs %>
+
+</body>
+</html>

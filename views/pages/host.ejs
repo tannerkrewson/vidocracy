@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <% include ../partials/header.ejs %>
+</head>
+
+<body>
+
+  <% include ../partials/nav.ejs %>
+
+  <div class="container">
+  </br></br></br>
+    <div class="row">
+    
+      <div id="subtitle" style="text-align:center">
+        <h1>Host a Toble</h1>
+      </div>
+
+      Send this link to your constituents:</br>
+      <a href="/toble/<%= code%>/">http://utoble.com/toble/<%= code%></a></br></br>
+
+      Send this link to your election officer:</br>
+      <a href="/toble/<%= code%>/admin/<%= adminCode%>/">http://utoble.com/toble/<%= code%>/admin/<%= adminCode%>/</a></br></br>
+
+      Use this link to diplay the results:</br>
+      <a href="/toble/<%= code%>/screen/">http://utoble.com/toble/<%= code%>/screen/</a></br></br>
+
+    </div>
+
+
+
+
+  </br></br></br>
+  </div> <!-- /container -->
+
+  <% include ../partials/footer.ejs %>
+
+</body>
+</html>
