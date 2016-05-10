@@ -21,16 +21,18 @@
             <table>
               <tr>
                 <td><i class="glyphicon glyphicon-search"></i></td>
-                <td><input type="text" class="form-control" placeholder="Search for a video or song..." /></td> 
+                <td><input type="text" class="form-control" id="searchinput" placeholder="Search for a video or song..." /></td> 
               </tr>
             </table>
           </div>
-          <a href="#" class="list-group-item">
-            The Beatles - Dear Prudence
-            <button type="button" class="btn btn-sm add btn-primary">
-               Add
-            </button>
-          </a>
+          <div id="searchresults">
+            <a href="#" class="list-group-item">
+              The Beatles - Dear Prudence
+              <button type="button" class="btn btn-sm add btn-primary">
+                 Add
+              </button>
+            </a>
+          </div>
         </div>
       </div>
 
@@ -78,9 +80,11 @@
       </div>
     </div>
   </div> <!-- /container -->
-
-<% include ../partials/footer.ejs %>
-<link rel="stylesheet" type="text/css" href="/css/toble.css" />
-
+  <div id="search-container"></div>
+  <div id="googleapikey" style="display: none;"><%= googleapikey%></div>
+  <% include ../partials/footer.ejs %>
+  <link rel="stylesheet" type="text/css" href="/css/toble.css" />
+  <script src="/js/toble.js"></script>
+  <script src="https://apis.google.com/js/client.js?onload=initializeYoutubeAPI"></script>
 </body>
 </html>
