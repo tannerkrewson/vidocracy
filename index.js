@@ -1,4 +1,5 @@
 var express = require('express');
+var socketio = require('socket.io');
 var app = express();
 
 var utoble = new TobleManager();
@@ -66,8 +67,49 @@ app.get('/toble/:code/admin/:admincode', function(request, response) {
 	console.log(request.params.code + ' ' + request.params.admincode);
 });
 
-app.listen(app.get('port'), function() {
+var server = app.listen(app.get('port'), function() {
   console.log('Utoble is running on port', app.get('port'));
+});
+
+//connect socket.io to the server
+var io = socketio.listen(server);
+
+//handles users coming and going
+io.on('connection', function(socket) {
+
+	sessionArray = socket.handshake.headers.cookie.split(" ");
+	sessionID = sessionArray[0].split("express.sid=").pop();
+
+	if(sessionIDs.indexOf(sessionID) > -1) {
+	   io.sockets.socket(socket.id).emit('preventlogin', true);
+	}
+	else {
+	   sessionIDs.push(sessionID);
+	   // and do the rest
+	}
+    socket.on('add', function(msg) {
+
+    	//check to see if the toble exists
+    	var thisToble = utoble.getToble(msg.tobleCode);
+
+    	if(thisToble !== null) {
+    		thisToble.queue(msg.queueItem);
+    	}
+    });
+
+    socket.on('upvote', function(msg) {
+
+    	//check to see if the toble exists
+    	var thisToble = utoble.getToble(msg.tobleCode);
+
+    	if(thisToble !== null) {
+    		//thisToble.upvote();
+    	}
+    });
+
+    socket.on('disconnect', function() {
+    	//do something
+    });
 });
 
 
@@ -110,12 +152,76 @@ TobleManager.prototype.getToble = function(code){
 	return null;
 }
 
+
 function Toble(uniqueCode) {
 	this.code = uniqueCode;
 
 	//does not need to be unique, so we can generate it right here
 	this.adminCode = fiveRandomLetters();
+
+	this.queue = [];
 }
+
+Toble.prototype.queue = function(queueItem) {
+	this.queue.add(queueItem);
+}
+
+Toble.prototype.vote = function(queueItemID, user) {
+	//TODO: if the user is valid
+	if (true) {
+		var tempQI = this.getQueueItem(queueItemID);
+		tempQI.toggleVote(user);
+	}
+}
+
+Toble.prototype.getQueueItem = function(queueItemID) {
+	for (var i = this.queue.length - 1; i >= 0; i--) {
+		if (this.queue[i].id === queueItemID){
+			return this.queue[i];
+		}
+	}
+	//queueitem does not exist
+	return null;	
+}
+
+
+function QueueItem(qi) {
+	//this.id = ;
+	this.title = qi.title;
+	this.votes = 0;
+	this.votedBy = [];
+}
+
+QueueItem.prototype.toggleVote = function(user) {
+	//if the user has not upvoted already
+    var hasAlreadyVoted = false;
+    for (var i = this.votedBy.length - 1; i >= 0; i--) {
+        if (this.votedBy[i].unique === user.unique) {
+            hasAlreadyVoted = true;
+            break;
+        }
+    };
+	if (!hasAlreadyVoted) {
+		this.votes++;
+		//add the user to the list of users who have upvoted
+		this.votedBy.push(user);
+	} else {
+		this.votes--;
+		//remove the user from the voted list
+		var upVoteIndex = this.votedBy.indexOf(user);
+		this.votedBy.splice(upVoteIndex, 1);
+	}
+}
+
+
+YouTubeQueueItem.prototype = Object.create(QueueItem.prototype);
+
+function YouTubeQueueItem(qi) {
+	QueueItem.call(qi);
+
+	this.videoID = qi.videoID;
+}
+
 
 function fiveRandomLetters() {
 	var text = "";
