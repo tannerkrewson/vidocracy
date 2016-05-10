@@ -1,8 +1,0 @@
-//To use this config file, you must remove all comments and rename it to config.json
-{
-    //Port: port in which the server will run off.
-    "port": 5000,
-
-    //Google Browser API Key
-    "googleAPIKey": "YOUR API KEY HERE"
-}

@@ -6,9 +6,17 @@ var utoble = new TobleManager();
 //read the config file
 var Config;
 try {
-    var Config = require('./config');
+    var Config = require('./config/user.config');
 } catch (e) {
-    console.log('Failed to parse config.js');
+    console.log('Failed to parse user.config.js');
+    console.log('Make sure you copy _template_user.config.js');
+    console.log('and rename it to user.config.js');
+    process.exit(1);
+}
+
+//make sure the google api key is set
+if (Config.googleAPIKey === undefined){
+    console.log('No Google API Key set');
     process.exit(1);
 }
 
