@@ -6,18 +6,13 @@ var utoble = new TobleManager();
 //read the config file
 var Config;
 try {
-    Config = JSON.parse(require('fs').readFileSync('./config.json', 'utf8'));
-    if (Config.googleAPIKey === 'YOUR API KEY HERE') {
-	    console.log('Please add your Google API key to config.json');
-	    process.exit(1);
-    }
+    var Config = require('./config');
 } catch (e) {
-    console.log('Failed to parse config.json');
-    console.log('Make sure you removed all comments and renamed it to config.json');
+    console.log('Failed to parse config.js');
     process.exit(1);
 }
 
-app.set('port', (process.env.PORT || Config.port));
+app.set('port', Config.port);
 
 app.use(express.static(__dirname + '/public'));
 
