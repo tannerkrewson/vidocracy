@@ -74,17 +74,30 @@ Search.displayResults = function(arrayOfQueueItems) {
 }
 
 Search.addSeachResult = function(queueItem) {
-  var resultHTML = '<div class="list-group-item">' + queueItem.title + '<button type="button" class="btn btn-sm add btn-primary">Add</button></div>';
+  //this id is just for the search results, and serves
+  //  only to help with the add button
+  var id;
+  //this loop is so that a duplicate id is not generated
+  //do until there is no other element with the same id
+  do {
+    //the random int simple servers to differentiate the 5 results
+    id = 'queueItemAddButton-' + (Math.floor(Math.random() * (99 - 10)) + 10);
+  } while($('#' + id).length !== 0);
+  
+  var resultHTML = '<div class="list-group-item">' + queueItem.title + '<button type="button" class="btn btn-sm add btn-primary" id="' + id + '">Add</button></div>';
   var result = $('#searchresults').prepend(resultHTML);
 
   //first will give us the Add button we just made,
   //  so we can hook up logic to it
-  var button = result.first();
+  var button = result.find('#' + id);
 
   //when this add button is clicked
-  button.on('click', function(event) {
-    SendToServer.add(queueItem);
-  });
+  // http://stackoverflow.com/questions/1451009/javascript-infamous-loop-issue
+  (function(qi) {
+    button.on('click', function(event) {
+      SendToServer.add(qi);
+    });
+  })(queueItem);
 }
 
 Search.clearSearchResults = function() {
