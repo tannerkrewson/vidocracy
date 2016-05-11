@@ -13,13 +13,14 @@ var utoble = new TobleManager();
 //read the config file
 var Config;
 try {
-    var Config = require('./config/user.config');
+    Config = require('./config/user.config');
 } catch (e) {
     console.log('Failed to parse user.config.js');
     console.log('');
     console.log('Make sure you copy _template_user.config.js');
     console.log('and rename it to user.config.js if you want');
     console.log('to override the default global config.');
+    Config = require('./config/global.config');
 }
 
 //make sure the google api key is set
