@@ -112,7 +112,7 @@ io.on('connection', function(socket) {
 
     	if (thisToble !== null) {
 		    socket.on('add', function(msg) {
-		    	thisToble.queue(msg.queueItem);
+		    	thisToble.add(msg.data.queueItem);
 		    });
 
 		    socket.on('upvote', function(msg) {
@@ -174,13 +174,14 @@ function Toble(uniqueCode) {
 	this.users = [];
 }
 
-Toble.prototype.queue = function(queueItem) {
-	this.queue.push(queueItem);
-}
-
 Toble.prototype.vote = function(queueItemID, userID) {
 	var tempQI = this.getQueueItem(queueItemID);
 	tempQI.toggleVote(userID);
+}
+
+Toble.prototype.add = function(queueItem) {
+	this.queue.push(queueItem);
+	console.log(queueItem.title + ' has been queued');
 }
 
 Toble.prototype.getQueueItem = function(queueItemID) {
@@ -241,7 +242,7 @@ QueueItem.prototype.toggleVote = function(userID) {
 YouTubeQueueItem.prototype = Object.create(QueueItem.prototype);
 
 function YouTubeQueueItem(qi) {
-	QueueItem.call(qi);
+	QueueItem.call(this, qi);
 
 	this.videoID = qi.videoID;
 }
