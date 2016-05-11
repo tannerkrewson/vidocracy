@@ -1,6 +1,12 @@
 var express = require('express');
 var socketio = require('socket.io');
+var crypto = require('crypto');
+var cookieParser = require('cookie-parser')
+
 var app = express();
+
+//middleware
+app.use(cookieParser())
 
 var utoble = new TobleManager();
 
@@ -51,8 +57,24 @@ app.get('/toble/:code', function(request, response) {
 	var code = request.params.code;
 	var toble = utoble.getToble(code);
 
+	//grab the user's token from their cookies,
+	//	will be undefined if it does not exist
+	var userToken = request.cookies.token;
+
 	//if toble exists
 	if (toble !== null){
+		//this will return the existing user or a new user
+    	var thisUser = toble.getUser(userToken);
+
+		//set a cookie that will act as the user's login token
+        response.cookie('id', thisUser.id, {
+            maxAge: 604800000 // Expires in one week
+        });
+
+        response.cookie('token', thisUser.token, {
+            maxAge: 604800000 // Expires in one week
+        });
+
 		response.render('pages/toble', {
 			code: toble.code,
 			googleapikey: Config.googleAPIKey
@@ -77,39 +99,26 @@ var io = socketio.listen(server);
 //handles users coming and going
 io.on('connection', function(socket) {
 
-	sessionArray = socket.handshake.headers.cookie.split(" ");
-	sessionID = sessionArray[0].split("express.sid=").pop();
-
-	if(sessionIDs.indexOf(sessionID) > -1) {
-	   io.sockets.socket(socket.id).emit('preventlogin', true);
-	}
-	else {
-	   sessionIDs.push(sessionID);
-	   // and do the rest
-	}
-    socket.on('add', function(msg) {
-
+	//client will send this when they join a valid toble
+	socket.on('entrance', function(msg){
+		//we now must check that their toble is valid
     	//check to see if the toble exists
     	var thisToble = utoble.getToble(msg.tobleCode);
 
-    	if(thisToble !== null) {
-    		thisToble.queue(msg.queueItem);
+    	//this will return the existing user or a new user
+    	var thisUser = thisToble.getUser(msg.user.token);
+
+    	if (thisToble !== null) {
+		    socket.on('add', function(msg) {
+		    	thisToble.queue(msg.queueItem);
+		    });
+
+		    socket.on('upvote', function(msg) {
+		    	thisToble.vote(msg.queueItemID, msg.user.id);
+		    });
     	}
-    });
+	});
 
-    socket.on('upvote', function(msg) {
-
-    	//check to see if the toble exists
-    	var thisToble = utoble.getToble(msg.tobleCode);
-
-    	if(thisToble !== null) {
-    		//thisToble.upvote();
-    	}
-    });
-
-    socket.on('disconnect', function() {
-    	//do something
-    });
 });
 
 
@@ -160,18 +169,16 @@ function Toble(uniqueCode) {
 	this.adminCode = fiveRandomLetters();
 
 	this.queue = [];
+	this.users = [];
 }
 
 Toble.prototype.queue = function(queueItem) {
-	this.queue.add(queueItem);
+	this.queue.push(queueItem);
 }
 
-Toble.prototype.vote = function(queueItemID, user) {
-	//TODO: if the user is valid
-	if (true) {
-		var tempQI = this.getQueueItem(queueItemID);
-		tempQI.toggleVote(user);
-	}
+Toble.prototype.vote = function(queueItemID, userID) {
+	var tempQI = this.getQueueItem(queueItemID);
+	tempQI.toggleVote(userID);
 }
 
 Toble.prototype.getQueueItem = function(queueItemID) {
@@ -184,19 +191,34 @@ Toble.prototype.getQueueItem = function(queueItemID) {
 	return null;	
 }
 
+//if the user already exists, it will return that one,
+//	otherwise it will create a new user and return that.
+Toble.prototype.getUser = function(userToken){
+	for (var i = this.users.length - 1; i >= 0; i--) {
+		if (this.users[i].token === userToken){
+			return this.users[i];
+		}
+	}
+
+	//user does not exist, so lets make a new one
+	var newUser = new User();
+	this.users.push(newUser);
+	return newUser;	
+}
+
 
 function QueueItem(qi) {
-	//this.id = ;
+	this.id = twentyRandomCharacters();
 	this.title = qi.title;
 	this.votes = 0;
 	this.votedBy = [];
 }
 
-QueueItem.prototype.toggleVote = function(user) {
+QueueItem.prototype.toggleVote = function(userID) {
 	//if the user has not upvoted already
     var hasAlreadyVoted = false;
     for (var i = this.votedBy.length - 1; i >= 0; i--) {
-        if (this.votedBy[i].unique === user.unique) {
+        if (this.votedBy[i] === userID) {
             hasAlreadyVoted = true;
             break;
         }
@@ -204,11 +226,11 @@ QueueItem.prototype.toggleVote = function(user) {
 	if (!hasAlreadyVoted) {
 		this.votes++;
 		//add the user to the list of users who have upvoted
-		this.votedBy.push(user);
+		this.votedBy.push(userID);
 	} else {
 		this.votes--;
 		//remove the user from the voted list
-		var upVoteIndex = this.votedBy.indexOf(user);
+		var upVoteIndex = this.votedBy.indexOf(userID);
 		this.votedBy.splice(upVoteIndex, 1);
 	}
 }
@@ -223,6 +245,16 @@ function YouTubeQueueItem(qi) {
 }
 
 
+function User() {
+	//id is meant to be public and can be sent to all clients
+	this.id = twentyRandomCharacters();
+
+	//token should be kept private between the corresponding user
+	//	and the server, and should never be sent to any other users
+	this.token = twentyRandomCharacters();
+}
+
+
 function fiveRandomLetters() {
 	var text = "";
     var possible = "abcdefghijklmnopqrstuvwxyz";
@@ -231,4 +263,8 @@ function fiveRandomLetters() {
         text += possible.charAt(Math.floor(Math.random() * possible.length));
 
     return text;
+}
+
+function twentyRandomCharacters() {
+	return crypto.randomBytes(20).toString('hex');
 }

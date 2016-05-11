@@ -7,17 +7,20 @@
     "start": "node index.js"
   },
   "dependencies": {
-    "ejs": "2.3.3",
-    "express": "4.13.3"
+    "cookie-parser": "^1.4.1",
+    "ejs": "^2.3.3",
+    "express": "^4.13.3",
+    "socket.io": "^1.4.6"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tannerkrewson/utoble"
+    "url": "git+https://github.com/tannerkrewson/utoble.git"
   },
   "author": "Tanner Krewson",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/tannerkrewson/utoble/issues"
   },
-  "homepage": "https://github.com/tannerkrewson/utoble#readme"
+  "homepage": "https://github.com/tannerkrewson/utoble#readme",
+  "devDependencies": {}
 }

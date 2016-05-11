@@ -1,3 +1,23 @@
+var socket = io();
+
+function SendToServer() {}
+
+SendToServer.generic = function(event, data){
+    socket.emit(event, {
+        tobleCode: $('#toblecode').html(),
+        user: {
+          id: Cookies.get('id'),
+          token: Cookies.get('token')
+        },
+        data: data
+    });
+}
+
+
+
+/*
+  YouTube Search
+*/
 
 //ran when Google's client.js loads
 function initializeYoutubeAPI() {

@@ -81,9 +81,11 @@
     </div>
   </div> <!-- /container -->
   <div id="search-container"></div>
+  <div id="toblecode" style="display: none;"><%= code%></div>
   <div id="googleapikey" style="display: none;"><%= googleapikey%></div>
   <% include ../partials/footer.ejs %>
   <link rel="stylesheet" type="text/css" href="/css/toble.css" />
+  <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
   <script src="/js/toble.js"></script>
   <script src="https://apis.google.com/js/client.js?onload=initializeYoutubeAPI"></script>
 </body>
