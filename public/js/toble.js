@@ -18,13 +18,15 @@ ytSearch.query = function(query) {
     //  the actual QI
     var queueItemArray = [];
     for (var i = 0; i < results.length; i++) {
-      var mockQI = {
+      var tempQI = {
         title: results[i].snippet.title,
-        videoID: results[i].id.videoId
+        type: 'youtube',
+        typeSpecific: {
+          videoID: results[i].id.videoId
+        }
       }
 
-      var realQI = new YouTubeQueueItem(mockQI);
-      queueItemArray.push(realQI);
+      queueItemArray.push(tempQI);
     }
 
     Search.displayResults(queueItemArray);
@@ -95,6 +97,11 @@ Search.addSeachResult = function(queueItem) {
   // http://stackoverflow.com/questions/1451009/javascript-infamous-loop-issue
   (function(qi) {
     button.on('click', function(event) {
+      Search.clearSearchResults();
+
+      //clears the search box
+      $('#searchinput').val('');
+      
       SendToServer.add(qi);
     });
   })(queueItem);
@@ -105,16 +112,49 @@ Search.clearSearchResults = function() {
 }
 
 
-function QueueItem(qi) {
-  this.title = qi.title;
+function Queue() {
+  this.queue = [];
 }
 
+Queue.prototype.populateQueue = function(newQueue) {
+  this.queue = newQueue;
+}
 
-YouTubeQueueItem.prototype = Object.create(QueueItem.prototype);
+Queue.prototype.displayQueue = function() {
+  Queue.clearQueueElement();
+  for (var i = this.queue.length - 1; i >= 0; i--) {
+    Queue.displayQueueItem(this.queue[i]);
+  }
+}
 
-function YouTubeQueueItem(qi) {
-  QueueItem.call(this, qi);
-  this.videoID = qi.videoID;
+Queue.displayQueueItem = function(queueItem) {
+
+  var resultHTML = '<div class="list-group-item clearfix queueitem">'
+    + queueItem.title
+    + '<button type="button" class="btn btn-sm upvote btn-primary" id="'
+    + queueItem.id
+    + '"> Upvote </button> <span class="badge votecount">'
+    + queueItem.votes
+    + '</span>';
+
+  var result = $('#queue').prepend(resultHTML);
+
+  //first will give us the Add button we just made,
+  //  so we can hook up logic to it
+  var button = result.find('#' + queueItem.id);
+
+  //when this add button is clicked
+  // http://stackoverflow.com/questions/1451009/javascript-infamous-loop-issue
+  (function(qi) {
+    button.on('click', function(event) {
+      //SendToServer.vote(qi);
+    });
+  })(queueItem);
+}
+
+//does NOT clear the queue array, just the div
+Queue.clearQueueElement = function() {
+  $('#queue').empty();
 }
 
 
@@ -142,4 +182,11 @@ $('#searchinput').on('keyup', function() {
 
 //Main Code
 
+var tobleQueue = new Queue();
+
 SendToServer.entrance();
+
+socket.on('queue', function(msg) {
+  tobleQueue.populateQueue(msg);
+  tobleQueue.displayQueue();
+});

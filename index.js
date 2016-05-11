@@ -111,8 +111,17 @@ io.on('connection', function(socket) {
     	var thisUser = thisToble.getUser(msg.user.token);
 
     	if (thisToble !== null) {
+
+    		//attach the user's socket to their user object
+    		thisUser.socket = socket;
+
+    		//send the user the current queue
+    		thisToble.sendQueueToUser(thisUser);
+
 		    socket.on('add', function(msg) {
-		    	thisToble.add(msg.data.queueItem);
+		    	//construct a new QueueItem from the one sent from the server
+		    	var qi = msg.data.queueItem;
+		    	thisToble.add(new QueueItem(qi.title, qi.type, qi.typeSpecific));
 		    });
 
 		    socket.on('upvote', function(msg) {
@@ -182,6 +191,9 @@ Toble.prototype.vote = function(queueItemID, userID) {
 Toble.prototype.add = function(queueItem) {
 	this.queue.push(queueItem);
 	console.log(queueItem.title + ' has been queued');
+
+	//send the new queue to all of the users
+	this.sendQueueToAll();
 }
 
 Toble.prototype.getQueueItem = function(queueItemID) {
@@ -209,12 +221,31 @@ Toble.prototype.getUser = function(userToken){
 	return newUser;	
 }
 
+Toble.prototype.sendQueueToAll = function() {
+	for (var i = this.users.length - 1; i >= 0; i--) {
+		this.sendQueueToUser(this.users[i]);
+	}
+}
 
-function QueueItem(qi) {
+//does NOT check to see if the user exists in this toble
+Toble.prototype.sendQueueToUser = function(user) {
+	var userSocket = user.socket;
+
+	//check to make sure that the user is online
+	if(userSocket.connected) {
+		userSocket.emit('queue', this.queue);
+	}
+}
+
+
+function QueueItem(title, type, typeSpecific) {
 	this.id = twentyRandomCharacters();
-	this.title = qi.title;
 	this.votes = 0;
 	this.votedBy = [];
+
+	this.title = title;
+	this.type = type;
+	this.typeSpecific = typeSpecific;
 }
 
 QueueItem.prototype.toggleVote = function(userID) {
@@ -239,14 +270,6 @@ QueueItem.prototype.toggleVote = function(userID) {
 }
 
 
-YouTubeQueueItem.prototype = Object.create(QueueItem.prototype);
-
-function YouTubeQueueItem(qi) {
-	QueueItem.call(this, qi);
-
-	this.videoID = qi.videoID;
-}
-
 
 function User() {
 	//id is meant to be public and can be sent to all clients
@@ -255,6 +278,9 @@ function User() {
 	//token should be kept private between the corresponding user
 	//	and the server, and should never be sent to any other users
 	this.token = twentyRandomCharacters();
+
+	//this should be added manually, this line is just here for reference
+	this.socket;
 }
 
 
