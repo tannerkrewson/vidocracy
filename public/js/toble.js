@@ -60,6 +60,14 @@ SendToServer.add = function(queueItem) {
   SendToServer.generic('add', data);
 }
 
+//vote on an item
+SendToServer.vote = function(queueItem) {
+  var data = {
+    queueItemID: queueItem.id
+  }
+  SendToServer.generic('vote', data);
+}
+
 
 function Search() {
   this.results = [];
@@ -129,13 +137,35 @@ Queue.prototype.displayQueue = function() {
 
 Queue.displayQueueItem = function(queueItem) {
 
+  //first we need to find out if our client has
+  //  upvoted this particular queue item so that
+  //  we can change the color and text of the
+  //  button accordingly using the .votedBy
+  //  included in the queueitem from the server
+  var thisUserID = Cookies.get('id');
+
+  //will be -1 if not found
+  var index = jQuery.inArray(thisUserID, queueItem.votedBy)
+
+  var buttonText;
+  var buttonClass;
+
+  //if user has not upvoted this
+  if (index === -1) {
+    buttonText = 'Upvote';
+    buttonClass = 'btn-primary';
+  } else {
+    buttonText = 'Upvoted';
+    buttonClass = 'btn-info';
+  }
+
   var resultHTML = '<div class="list-group-item clearfix queueitem">'
     + queueItem.title
-    + '<button type="button" class="btn btn-sm upvote btn-primary" id="'
-    + queueItem.id
-    + '"> Upvote </button> <span class="badge votecount">'
-    + queueItem.votes
-    + '</span>';
+    + '<button type="button" class="btn btn-sm upvote '
+    + buttonClass + '" id="'
+    + queueItem.id + '"> ' + buttonText
+    + ' </button> <span class="badge votecount">'
+    + queueItem.votes + '</span>';
 
   var result = $('#queue').prepend(resultHTML);
 
@@ -147,7 +177,7 @@ Queue.displayQueueItem = function(queueItem) {
   // http://stackoverflow.com/questions/1451009/javascript-infamous-loop-issue
   (function(qi) {
     button.on('click', function(event) {
-      //SendToServer.vote(qi);
+      SendToServer.vote(qi);
     });
   })(queueItem);
 }

@@ -124,8 +124,8 @@ io.on('connection', function(socket) {
 		    	thisToble.add(new QueueItem(qi.title, qi.type, qi.typeSpecific));
 		    });
 
-		    socket.on('upvote', function(msg) {
-		    	thisToble.vote(msg.queueItemID, msg.user.id);
+		    socket.on('vote', function(msg) {
+		    	thisToble.vote(msg.data.queueItemID, msg.user.id);
 		    });
     	}
 	});
@@ -185,7 +185,11 @@ function Toble(uniqueCode) {
 
 Toble.prototype.vote = function(queueItemID, userID) {
 	var tempQI = this.getQueueItem(queueItemID);
-	tempQI.toggleVote(userID);
+	if(tempQI !== null){
+		tempQI.toggleVote(userID);
+	}
+
+	this.sendQueueToAll();
 }
 
 Toble.prototype.add = function(queueItem) {
