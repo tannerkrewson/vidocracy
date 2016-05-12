@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <% include ../partials/header.ejs %>
+</head>
+
+<body>
+
+  <% include ../partials/nav.ejs %>
+
+  <div class="container">
+  </br></br></br>
+    <div class="row">
+    
+      <div id="subtitle">
+        <h1>Screen</h1>
+        <h3>Toble Code: <%= code%></h3>
+      </div>
+
+      <div class="embed-responsive embed-responsive-16by9">
+        <div id="player"></div>
+      </div>
+    </div>
+
+
+
+
+  </br></br></br>
+  </div> <!-- /container -->
+
+  <div id="toblecode" style="display: none;"><%= code%></div>
+  <div id="googleapikey" style="display: none;"><%= googleapikey%></div>
+
+  <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/js-cookie/2.1.1/js.cookie.min.js"></script>
+  <script src="/js/screen.js"></script>
+  <script src="http://www.youtube.com/player_api"></script>
+  <% include ../partials/footer.ejs %>
+
+</body>
+</html>

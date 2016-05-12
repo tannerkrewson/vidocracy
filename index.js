@@ -88,7 +88,39 @@ app.get('/toble/:code', function(request, response) {
 });
 
 app.get('/toble/:code/admin/:admincode', function(request, response) {
-	console.log(request.params.code + ' ' + request.params.admincode);
+
+});
+
+app.get('/toble/:code/screen', function(request, response) {
+	var code = request.params.code;
+	var toble = utoble.getToble(code);
+
+	//grab the user's token from their cookies,
+	//	will be undefined if it does not exist
+	var userToken = request.cookies.screenToken;
+
+	//if toble exists and the admin code is correct
+	if (toble !== null) {
+		//this will return the existing user or a new user
+    	var thisScreen = toble.getScreen(userToken);
+
+		//set a cookie that will act as the user's login token
+        response.cookie('screenid', thisScreen.id, {
+            maxAge: 604800000 // Expires in one week
+        });
+
+        response.cookie('screentoken', thisScreen.token, {
+            maxAge: 604800000 // Expires in one week
+        });
+
+		response.render('pages/screen', {
+			code: toble.code,
+			googleapikey: Config.googleAPIKey
+		});
+	} else {
+		//send them back home
+		response.redirect('/');
+	}
 });
 
 var server = app.listen(app.get('port'), function() {
@@ -129,6 +161,22 @@ io.on('connection', function(socket) {
 		    });
     	}
 	});
+
+	//screen
+	socket.on('screenConnect', function(msg) {
+		//we now must check that their toble is valid
+    	//check to see if the toble exists
+    	var thisToble = utoble.getToble(msg.tobleCode);
+
+    	//this will return the existing user or a new user
+    	var thisUser = thisToble.getScreen(msg.screen.token);
+
+    	if (thisToble !== null) {
+
+    		//attach the user's socket to their user object
+    		thisUser.socket = socket;
+    	}
+	})
 
 });
 
@@ -181,6 +229,7 @@ function Toble(uniqueCode) {
 
 	this.queue = [];
 	this.users = [];
+	this.screens = [];
 
 	//this signifies that nothing is playing
 	this.nowPlaying = new QueueItem('','empty','');
@@ -263,6 +312,40 @@ Toble.prototype.getUser = function(userToken){
 	return newUser;	
 }
 
+//if the user already exists, it will return that one,
+//	otherwise it will create a new user and return that.
+Toble.prototype.getScreen = function(screenToken){
+	for (var i = this.screens.length - 1; i >= 0; i--) {
+		if (this.screens[i].token === screenToken){
+			return this.screens[i];
+		}
+	}
+
+	//user does not exist, so lets make a new one
+	//screens are just special users
+	var newUser = new User();
+	this.screens.push(newUser);
+	return newUser;	
+}
+
+Toble.prototype.sendVideoToScreens = function(queueItem) {
+	for (var i = this.screens.length - 1; i >= 0; i--) {
+		this.sendVideoToScreen(queueItem, this.screens[i]);
+	};
+}
+
+Toble.prototype.sendVideoToScreen = function(queueItem, screenUser) {
+	var userSocket = screenUser.socket;
+
+	//check to make sure that the screen is online
+	if(userSocket.connected) {
+		var data = {
+			queueitem: queueItem
+		}
+		userSocket.emit('set', data);
+	}
+}
+
 Toble.prototype.sendQueueToAll = function() {
 	for (var i = this.users.length - 1; i >= 0; i--) {
 		this.sendQueueToUser(this.users[i]);
@@ -291,6 +374,9 @@ Toble.prototype.queueNextItem = function() {
 
 		//remove now playing from the queue
 		this.queue.splice(0, 1);
+
+		//tell the screens to play the video
+		this.sendVideoToScreens(this.nowPlaying);
 	} else {
 		this.nowPlaying = new QueueItem('','empty','');
 	}
