@@ -121,7 +121,7 @@ io.on('connection', function(socket) {
 		    socket.on('add', function(msg) {
 		    	//construct a new QueueItem from the one sent from the server
 		    	var qi = msg.data.queueItem;
-		    	thisToble.add(new QueueItem(qi.title, qi.type, qi.typeSpecific));
+		    	thisToble.add(new QueueItem(qi.title, qi.type, qi.typeSpecific), msg.user.id);
 		    });
 
 		    socket.on('vote', function(msg) {
@@ -189,15 +189,45 @@ Toble.prototype.vote = function(queueItemID, userID) {
 		tempQI.toggleVote(userID);
 	}
 
+	//remove the item from the queue if the vote count
+	//	drops to zero, meaning the person who added
+	//	it un-upvoted it.
+	if (tempQI.votes < 1) {
+		//remove it
+		var index = this.queue.indexOf(tempQI);
+		if (index > -1) {
+		    this.queue.splice(index, 1);
+		}
+	}
+
+	this.sortQueue();
+
 	this.sendQueueToAll();
 }
 
-Toble.prototype.add = function(queueItem) {
+Toble.prototype.add = function(queueItem, userID) {
 	this.queue.push(queueItem);
 	console.log(queueItem.title + ' has been queued');
 
+	//user automatically votes for the item they added
+	this.vote(queueItem.id, userID);
+	this.sortQueue();
+
 	//send the new queue to all of the users
 	this.sendQueueToAll();
+}
+
+Toble.prototype.sortQueue = function() {
+	//sorts by greatest to least number of votes
+	this.queue.sort(function(a, b) {
+		if (a.votes > b.votes) {
+			return -1;
+		} else if (a.votes < b.votes) {
+			return 1;
+		} else {
+			return 0;
+		}
+	});
 }
 
 Toble.prototype.getQueueItem = function(queueItemID) {
