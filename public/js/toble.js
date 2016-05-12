@@ -121,6 +121,7 @@ Search.clearSearchResults = function() {
 
 
 function Queue() {
+  this.nowPlaying;
   this.queue = [];
 }
 
@@ -128,11 +129,21 @@ Queue.prototype.populateQueue = function(newQueue) {
   this.queue = newQueue;
 }
 
+//pass the queue item that is in the now playing slot in the server
+Queue.prototype.setNowPlaying = function(np) {
+  this.nowPlaying = np;
+}
+
 Queue.prototype.displayQueue = function() {
   Queue.clearQueueElement();
   for (var i = this.queue.length - 1; i >= 0; i--) {
     Queue.displayQueueItem(this.queue[i]);
   }
+
+  //fill now playing bar
+  var nowPlaying = $('#nowplaying');
+  nowPlaying.find('.title').html('Now Playing: ' + this.nowPlaying.title);
+  nowPlaying.find('.votecount').html(this.nowPlaying.votes);
 }
 
 Queue.displayQueueItem = function(queueItem) {
@@ -217,6 +228,8 @@ var tobleQueue = new Queue();
 SendToServer.entrance();
 
 socket.on('queue', function(msg) {
-  tobleQueue.populateQueue(msg);
+  tobleQueue.populateQueue(msg.queue);
+  tobleQueue.setNowPlaying(msg.nowPlaying);
+
   tobleQueue.displayQueue();
 });

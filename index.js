@@ -181,6 +181,9 @@ function Toble(uniqueCode) {
 
 	this.queue = [];
 	this.users = [];
+
+	//this signifies that nothing is playing
+	this.nowPlaying = new QueueItem('','empty','');
 }
 
 Toble.prototype.vote = function(queueItemID, userID) {
@@ -228,6 +231,11 @@ Toble.prototype.sortQueue = function() {
 			return 0;
 		}
 	});
+
+	//make sure now playing is not empty
+	if (this.nowPlaying.type === 'empty') {
+		this.queueNextItem();
+	}
 }
 
 Toble.prototype.getQueueItem = function(queueItemID) {
@@ -267,8 +275,26 @@ Toble.prototype.sendQueueToUser = function(user) {
 
 	//check to make sure that the user is online
 	if(userSocket.connected) {
-		userSocket.emit('queue', this.queue);
+		var data = {
+			queue: this.queue,
+			nowPlaying: this.nowPlaying
+		}
+		userSocket.emit('queue', data);
 	}
+}
+
+Toble.prototype.queueNextItem = function() {
+	//if the queue is not empty
+	if (this.queue.length > 0) {
+		//set now playing to the next in the queue
+		this.nowPlaying = this.queue[0];
+
+		//remove now playing from the queue
+		this.queue.splice(0, 1);
+	} else {
+		this.nowPlaying = new QueueItem('','empty','');
+	}
+	
 }
 
 
