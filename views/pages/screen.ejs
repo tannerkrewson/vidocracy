@@ -13,7 +13,7 @@
     <div class="row">
     
       <div id="subtitle">
-        <h1>Screen</h1>
+        <h1><%= pageTitle%></h1>
         <h3>Toble Code: <%= code%></h3>
       </div>
 
@@ -29,6 +29,7 @@
   </div> <!-- /container -->
 
   <div id="toblecode" style="display: none;"><%= code%></div>
+  <div id="admincode" style="display: none;"><%= admincode%></div>
   <div id="googleapikey" style="display: none;"><%= googleapikey%></div>
 
   <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>

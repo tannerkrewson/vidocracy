@@ -91,6 +91,7 @@ app.get('/toble/:code/admin/:admincode', function(request, response) {
 
 });
 
+//user screens
 app.get('/toble/:code/screen', function(request, response) {
 	var code = request.params.code;
 	var toble = utoble.getToble(code);
@@ -99,7 +100,7 @@ app.get('/toble/:code/screen', function(request, response) {
 	//	will be undefined if it does not exist
 	var userToken = request.cookies.screenToken;
 
-	//if toble exists and the admin code is correct
+	//if toble exists
 	if (toble !== null) {
 		//this will return the existing user or a new user
     	var thisScreen = toble.getScreen(userToken);
@@ -114,7 +115,37 @@ app.get('/toble/:code/screen', function(request, response) {
         });
 
 		response.render('pages/screen', {
+			pageTitle: 'Screen',
 			code: toble.code,
+			admincode: '',
+			googleapikey: Config.googleAPIKey
+		});
+	} else {
+		//send them back home
+		response.redirect('/');
+	}
+});
+
+//main screen
+app.get('/toble/:code/screen/:admincode', function(request, response) {
+	var code = request.params.code;
+	var adminCode = request.params.admincode;
+	var toble = utoble.getToble(code);
+
+	//we don't need to worry about screenTokens for the main screen
+	//	because their can be only one main screen, and it will be
+	//	authenticated by the admin code
+
+	//	AND no other main screen is currently connected
+	var isAnotherMainScreenNotConnected = (toble.mainScreen.socket === undefined || !toble.mainScreen.socket.connected);
+
+	//if toble exists and the admin code is correct
+	if (toble !== null && toble.adminCode === adminCode && isAnotherMainScreenNotConnected) {
+
+		response.render('pages/screen', {
+			pageTitle: 'Main Screen',
+			code: toble.code,
+			admincode: toble.adminCode,
 			googleapikey: Config.googleAPIKey
 		});
 	} else {
@@ -162,7 +193,7 @@ io.on('connection', function(socket) {
     	}
 	});
 
-	//screen
+	//user screen
 	socket.on('screenConnect', function(msg) {
 		//we now must check that their toble is valid
     	//check to see if the toble exists
@@ -175,6 +206,31 @@ io.on('connection', function(socket) {
 
     		//attach the user's socket to their user object
     		thisUser.socket = socket;
+    	}
+	})
+
+	//main screen
+	socket.on('mainScreenConnect', function(msg) {
+		//we now must check that their toble is valid
+    	//check to see if the toble exists
+    	var thisToble = utoble.getToble(msg.tobleCode);
+
+    	var newMainScreen = new User();
+
+    	//the admin code check has already been done by the express function
+    	//	but we check again for security
+    	if (thisToble !== null && msg.adminCode === thisToble.adminCode) {
+
+    		//attach this screen's socket to it's user object
+    		newMainScreen.socket = socket;
+
+    		//set this as the toble's new main screen
+    		thisToble.mainScreen = newMainScreen;
+
+    		//if the video ends, start the next one
+		    socket.on('videoEnd', function(msg) {
+		    	thisToble.queueNextItem();
+		    });
     	}
 	})
 
@@ -230,6 +286,8 @@ function Toble(uniqueCode) {
 	this.queue = [];
 	this.users = [];
 	this.screens = [];
+
+	this.mainScreen = new User();
 
 	//this signifies that nothing is playing
 	this.nowPlaying = new QueueItem('','empty','');
@@ -329,6 +387,10 @@ Toble.prototype.getScreen = function(screenToken){
 }
 
 Toble.prototype.sendVideoToScreens = function(queueItem) {
+	//first, send it to the main screen
+	this.sendVideoToScreen(queueItem, this.mainScreen);
+
+	//and finally send it to all the other screens
 	for (var i = this.screens.length - 1; i >= 0; i--) {
 		this.sendVideoToScreen(queueItem, this.screens[i]);
 	};

@@ -5,19 +5,36 @@ function SendToServer() {}
 SendToServer.generic = function(event, data){
     socket.emit(event, {
         tobleCode: $('#toblecode').html(),
+        adminCode: $('#admincode').html(),
         screen: {
-			id: Cookies.get('screenid'),
-			token: Cookies.get('screentoken')
+    			id: Cookies.get('screenid'),
+    			token: Cookies.get('screentoken')
         },
         data: data
     });
+    /*  Note about the above, if the page was loaded as a
+        main screen, id and token above will not used in
+        checks by the server, but if it was loaded as a
+        user screen, adminCode won't be used.
+    */
 }
 
 //should be called at page load
 SendToServer.screenConnect = function(){
-  SendToServer.generic('screenConnect', null);
+  //the admincode div is only filled if the page was
+  //  loaded as a main screen
+  if ($('#admincode').html() !== ''){
+    SendToServer.generic('mainScreenConnect', null);
+  } else {
+    SendToServer.generic('screenConnect', null);
+  }
 }
 
+SendToServer.videoEnd = function() {
+  if ($('#admincode').html() !== ''){
+    SendToServer.generic('videoEnd', null);
+  } 
+}
 
 // create youtube player
 var player;
@@ -41,9 +58,10 @@ function onPlayerReady(event) {
 
 // when video ends
 function onPlayerStateChange(event) {  
+  //we are only going to send this if we are the main screen
 	//0 means video has ended      
-	if(event.data === 0) {          
-	  //do something
+	if($('#admincode').html() !== '' && event.data === 0) {          
+    SendToServer.videoEnd();
 	}
 }
 
