@@ -8,6 +8,12 @@ table {
   bottom: 4px;
 }
 
+.delete {
+  position: absolute;
+  right: 130px;
+  bottom: 4px;
+}
+
 .add {
   position: absolute;
   bottom: 4px;

@@ -88,7 +88,27 @@ app.get('/toble/:code', function(request, response) {
 });
 
 app.get('/toble/:code/admin/:admincode', function(request, response) {
+	//add the admin code to the users code, and 
+	//	redirect them to the toble page, which
+	//	itself will check if the user is admin
+	var code = request.params.code;
+	var adminCode = request.params.admincode;
+	var toble = utoble.getToble(code);
 
+	//if toble exists and the admin code is correct
+	if (toble !== null && toble.adminCode === adminCode){
+
+        response.cookie('admincode', adminCode, {
+            maxAge: 604800000 // Expires in one week
+        });
+
+        //redirect to toble page
+        response.redirect('/toble/' + code);
+
+	} else {
+		//send them back home
+		response.redirect('/');
+	}
 });
 
 //user screens
@@ -137,7 +157,7 @@ app.get('/toble/:code/screen/:admincode', function(request, response) {
 	//	authenticated by the admin code
 
 	//	AND no other main screen is currently connected
-	var isAnotherMainScreenNotConnected = (toble.mainScreen.socket === undefined || !toble.mainScreen.socket.connected);
+	var isAnotherMainScreenNotConnected = (toble.mainScreen === null || !toble.mainScreen.socket.connected);
 
 	//if toble exists and the admin code is correct
 	if (toble !== null && toble.adminCode === adminCode && isAnotherMainScreenNotConnected) {
@@ -190,6 +210,19 @@ io.on('connection', function(socket) {
 		    socket.on('vote', function(msg) {
 		    	thisToble.vote(msg.data.queueItemID, msg.user.id);
 		    });
+
+		    //now we'll check if this user is a valid admin
+		    if (msg.adminCode === thisToble.adminCode) {
+
+		    	//tell the client that it is an admin, so
+		    	//	that it can display the admin tools
+				socket.emit('admin', null);
+
+				//add the admin only socket listeners
+			    socket.on('delete', function(msg) {
+			    	thisToble.delete(msg.data.queueItemID);
+			    });
+		    };
     	}
 	});
 
@@ -287,7 +320,7 @@ function Toble(uniqueCode) {
 	this.users = [];
 	this.screens = [];
 
-	this.mainScreen = new User();
+	this.mainScreen = null;
 
 	//this signifies that nothing is playing
 	this.nowPlaying = new QueueItem('','empty','');
@@ -324,6 +357,21 @@ Toble.prototype.add = function(queueItem, userID) {
 	this.sortQueue();
 
 	//send the new queue to all of the users
+	this.sendQueueToAll();
+}
+
+Toble.prototype.delete = function(queueItemID) {
+	var tempQI = this.getQueueItem(queueItemID);
+	if(tempQI !== null){
+		//remove it
+		var index = this.queue.indexOf(tempQI);
+		if (index > -1) {
+		    this.queue.splice(index, 1);
+		}
+	}
+
+	this.sortQueue();
+
 	this.sendQueueToAll();
 }
 
@@ -387,8 +435,10 @@ Toble.prototype.getScreen = function(screenToken){
 }
 
 Toble.prototype.sendVideoToScreens = function(queueItem) {
-	//first, send it to the main screen
-	this.sendVideoToScreen(queueItem, this.mainScreen);
+	//first, send it to the main screen, if it is connected
+	if (this.mainScreen !== null && this.mainScreen.socket.connected) {
+		this.sendVideoToScreen(queueItem, this.mainScreen);
+	};
 
 	//and finally send it to all the other screens
 	for (var i = this.screens.length - 1; i >= 0; i--) {

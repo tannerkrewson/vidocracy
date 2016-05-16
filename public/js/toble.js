@@ -2,6 +2,8 @@ var socket = io();
 
 var ytSearch = new Search();
 
+var isAdmin = false;
+
 ytSearch.query = function(query) {
 //sends the API request, and executes a function
 //  when the results come back
@@ -39,6 +41,7 @@ function SendToServer() {}
 SendToServer.generic = function(event, data){
     socket.emit(event, {
         tobleCode: $('#toblecode').html(),
+        adminCode: Cookies.get('admincode'),
         user: {
           id: Cookies.get('id'),
           token: Cookies.get('token')
@@ -66,6 +69,17 @@ SendToServer.vote = function(queueItem) {
     queueItemID: queueItem.id
   }
   SendToServer.generic('vote', data);
+}
+
+
+//Admin Only Commands:
+
+//delete an item
+SendToServer.delete = function(queueItem) {
+  var data = {
+    queueItemID: queueItem.id
+  }
+  SendToServer.generic('delete', data);
 }
 
 
@@ -170,19 +184,21 @@ Queue.displayQueueItem = function(queueItem) {
     buttonClass = 'btn-info';
   }
 
-  var resultHTML = '<div class="list-group-item clearfix queueitem">'
+  var resultHTML = '<div class="list-group-item clearfix queueitem" id="'
+    + queueItem.id + '">'
     + queueItem.title
-    + '<button type="button" class="btn btn-sm upvote '
-    + buttonClass + '" id="'
-    + queueItem.id + '"> ' + buttonText
-    + ' </button> <span class="badge votecount">'
+    + '<button type="button" class="btn btn-sm qiBtn upvote '
+    + buttonClass + '"> '
+    + buttonText + ' </button> <span class="badge votecount">'
     + queueItem.votes + '</span>';
 
-  var result = $('#queue').prepend(resultHTML);
+  $('#queue').prepend(resultHTML);
+
+  var result = $('#' + queueItem.id);
 
   //first will give us the Add button we just made,
   //  so we can hook up logic to it
-  var button = result.find('#' + queueItem.id);
+  var button = result.find('.upvote');
 
   //when this add button is clicked
   // http://stackoverflow.com/questions/1451009/javascript-infamous-loop-issue
@@ -191,6 +207,26 @@ Queue.displayQueueItem = function(queueItem) {
       SendToServer.vote(qi);
     });
   })(queueItem);
+
+  //If the user is admin, we'll add the delete button.
+  //Note that the user could fake this through a
+  //  console command, however because the server checks
+  //  each command sent for authenticity, clicking the
+  //  the button will do nothing.
+  if (isAdmin) {
+    var delButHTML = '<button type="button" class="btn btn-sm btn-danger qiBtn delete">Delete</button>';
+
+    //delete button comes before the upvote button
+    button.before(delButHTML);
+    var delBut = result.find('.delete');
+
+    (function(qi) {
+      delBut.on('click', function(event) {
+        SendToServer.delete(qi);
+      });
+    })(queueItem);
+
+  };
 }
 
 //does NOT clear the queue array, just the div
@@ -233,3 +269,19 @@ socket.on('queue', function(msg) {
 
   tobleQueue.displayQueue();
 });
+
+//this will be sent if the server determines that this
+//  user is a valid admin for this toble
+socket.on('admin', function(msg) {
+  console.log('Admin Code: ' + Cookies.get('admincode'))
+  isAdmin = true;
+
+  //visual cue that this page is an admin page
+  $('#subtitle h1').html('Your Toble (Admin)');
+
+  //we do this so that the admin tools will show up on the queue
+  //  otherwise they won't show up until the queue is displayed
+  //  again
+  tobleQueue.displayQueue();
+});
+
