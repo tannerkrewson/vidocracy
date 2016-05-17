@@ -1,5 +1,7 @@
 var socket = io();
 
+var waitingMessage = $('#waitingmessage');
+
 function SendToServer() {}
 
 SendToServer.generic = function(event, data){
@@ -48,7 +50,10 @@ function onYouTubePlayerAPIReady() {
   });
 
   //add bootstrap responsive embed to the new player
-  $('player').addClass('embed-responsive-item');
+  $('#player').addClass('embed-responsive-item');
+
+  //hide the player by default
+  $('#player').hide();
 }
 
 // autoplay video
@@ -60,7 +65,14 @@ function onPlayerReady(event) {
 function onPlayerStateChange(event) {  
   //we are only going to send this if we are the main screen
 	//0 means video has ended      
-	if($('#admincode').html() !== '' && event.data === 0) {          
+	if($('#admincode').html() !== '' && event.data === 0) {
+
+    //show the waiting message
+    waitingMessage.show();
+
+    //hide the youtube player
+    $('#player').hide();
+
     SendToServer.videoEnd();
 	}
 }
@@ -75,5 +87,12 @@ SendToServer.screenConnect();
 
 socket.on('set', function(msg) {
 	var qi = msg.queueitem;
+
+  //hide the waiting message
+  waitingMessage.hide();
+
+  //unhide the youtube player
+  $('#player').show();
+
 	playVideo(qi.typeSpecific.videoID);
 })
