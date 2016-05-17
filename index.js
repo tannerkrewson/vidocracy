@@ -25,7 +25,15 @@ try {
 
 //make sure the google api key is set
 if (Config.googleAPIKey === undefined){
-    console.log('No Google API Key set');
+    console.log('Please set a Google API Key in user.config.js');
+    console.log('or as process.env.GOOGLEAPIKEY');
+    process.exit(1);
+}
+
+//make sure the url is set
+if (Config.url === undefined){
+    console.log('Please set a url in user.config.js');
+    console.log('or as process.env.URL');
     process.exit(1);
 }
 
@@ -41,9 +49,20 @@ app.get('/host', function(request, response) {
 	//create a new toble
 	var newToble = utoble.newToble();
 
+	//if its 80, leave it blank, because browsers do that for you
+	var utoblePort = Config.port === 80 ? '' : ':' + Config.port;
+
+	var utobleURL = 'http://' + Config.url + utoblePort + '/';
+
 	response.render('pages/host', {
 		code: newToble.code,
-		adminCode: newToble.adminCode
+		adminCode: newToble.adminCode,
+		url: {
+			toble: utobleURL + 'toble/' + newToble.code,
+			adminToble: utobleURL + 'toble/' + newToble.code + '/admin/' + newToble.adminCode,
+			mainScreen: utobleURL + 'toble/' + newToble.code + '/screen/' + newToble.adminCode,
+			userScreen: utobleURL + 'toble/' + newToble.code + '/screen/'
+		}
 	});
 });
 
