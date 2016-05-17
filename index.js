@@ -5,6 +5,8 @@ var cookieParser = require('cookie-parser')
 
 var app = express();
 
+console.log(process.env.PORT);
+
 //middleware
 app.use(cookieParser())
 
@@ -50,7 +52,7 @@ app.get('/host', function(request, response) {
 	var newToble = utoble.newToble();
 
 	//if its 80, leave it blank, because browsers do that for you
-	var utoblePort = Config.port === 80 ? '' : ':' + Config.port;
+	var utoblePort = Config.port === 80 || Config.port === process.env.PORT ? '' : ':' + Config.port;
 
 	var utobleURL = 'http://' + Config.url + utoblePort + '/';
 
