@@ -5,8 +5,6 @@ var cookieParser = require('cookie-parser')
 
 var app = express();
 
-console.log(process.env.PORT);
-
 //middleware
 app.use(cookieParser())
 
@@ -281,6 +279,9 @@ io.on('connection', function(socket) {
     		//set this as the toble's new main screen
     		thisToble.mainScreen = newMainScreen;
 
+    		//send the top video to our new main screen
+    		thisToble.queueNextItem();
+
     		//if the video ends, start the next one
 		    socket.on('videoEnd', function(msg) {
 		    	thisToble.queueNextItem();
@@ -500,8 +501,11 @@ Toble.prototype.sendQueueToUser = function(user) {
 }
 
 Toble.prototype.queueNextItem = function() {
-	//if the queue is not empty
-	if (this.queue.length > 0) {
+
+	var isMainScreenConnected = (this.mainScreen !== null && this.mainScreen.socket.connected);
+
+	//if the queue is not empty and a main screen is connected
+	if (this.queue.length > 0 && isMainScreenConnected) {
 		//set now playing to the next in the queue
 		this.nowPlaying = this.queue[0];
 
@@ -510,6 +514,9 @@ Toble.prototype.queueNextItem = function() {
 
 		//tell the screens to play the video
 		this.sendVideoToScreens(this.nowPlaying);
+
+		//send the updated queue to everybody
+		this.sendQueueToAll();
 	} else {
 		this.nowPlaying = new QueueItem('','empty','');
 	}

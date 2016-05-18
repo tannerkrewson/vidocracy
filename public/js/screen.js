@@ -56,9 +56,27 @@ function onYouTubePlayerAPIReady() {
   $('#player').hide();
 }
 
-// autoplay video
+// called when the youtube player is finished loading
 function onPlayerReady(event) {
-  event.target.playVideo();
+  //autoplay video
+  //event.target.playVideo();
+
+  //wait until the youtube player has initialized until connecting
+  //  to the server to prevent it from sending the video before
+  //  it is loaded and ready to play
+  SendToServer.screenConnect();
+
+  socket.on('set', function(msg) {
+    var qi = msg.queueitem;
+
+    //hide the waiting message
+    waitingMessage.hide();
+
+    //unhide the youtube player
+    $('#player').show();
+
+    playVideo(qi.typeSpecific.videoID);
+  })
 }
 
 // when video ends
@@ -80,19 +98,3 @@ function onPlayerStateChange(event) {
 function playVideo(videoId) {
 	player.loadVideoById(videoId);
 }
-
-//main code
-
-SendToServer.screenConnect();
-
-socket.on('set', function(msg) {
-	var qi = msg.queueitem;
-
-  //hide the waiting message
-  waitingMessage.hide();
-
-  //unhide the youtube player
-  $('#player').show();
-
-	playVideo(qi.typeSpecific.videoID);
-})
