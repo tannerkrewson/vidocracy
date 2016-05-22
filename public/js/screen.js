@@ -45,7 +45,8 @@ function onYouTubePlayerAPIReady() {
     videoId: '',
     events: {
       'onReady': onPlayerReady,
-      'onStateChange': onPlayerStateChange
+      'onStateChange': onPlayerStateChange,
+      'onError': onPlayerError
     }
   });
 
@@ -91,8 +92,28 @@ function onPlayerStateChange(event) {
     //hide the youtube player
     $('#player').hide();
 
+    //tell the server to play the next video
     SendToServer.videoEnd();
 	}
+}
+
+// if the video causes an error
+function onPlayerError(event) {  
+  //we are only going to send this if we are the main screen
+  //i am not checking the error number b/c the type of
+  //  error doesn't matter, we're just going to ask for the
+  //  next video  
+  if($('#admincode').html() !== '') {
+
+    //show the waiting message
+    waitingMessage.show();
+
+    //hide the youtube player
+    $('#player').hide();
+
+    //tell the server to play the next video
+    SendToServer.videoEnd();
+  }
 }
 
 function playVideo(videoId) {

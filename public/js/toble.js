@@ -9,7 +9,9 @@ ytSearch.query = function(query) {
 //  when the results come back
   var request = gapi.client.youtube.search.list({
     q: query,
-    part: 'snippet'
+    part: 'snippet',
+    type: 'video',
+    videoEmbeddable: 'true'
   });
 
   request.execute(function(response) {
