@@ -6,7 +6,7 @@ function SendToServer() {}
 
 SendToServer.generic = function(event, data){
     socket.emit(event, {
-        tobleCode: $('#toblecode').html(),
+        partyCode: $('#partycode').html(),
         adminCode: $('#admincode').html(),
         screen: {
     			id: Cookies.get('screenid'),

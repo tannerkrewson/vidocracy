@@ -8,7 +8,7 @@ var app = express();
 //middleware
 app.use(cookieParser())
 
-var utoble = new TobleManager();
+var vidocracy = new PartyManager();
 
 //read the config file
 var Config;
@@ -46,22 +46,22 @@ app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
 
 app.get('/host', function(request, response) {
-	//create a new toble
-	var newToble = utoble.newToble();
+	//create a new party
+	var newParty = vidocracy.newParty();
 
 	//if its 80, leave it blank, because browsers do that for you
-	var utoblePort = Config.port === 80 || Config.port === process.env.PORT ? '' : ':' + Config.port;
+	var vidocracyPort = Config.port === 80 || Config.port === process.env.PORT ? '' : ':' + Config.port;
 
-	var utobleURL = 'http://' + Config.url + utoblePort + '/';
+	var vidocracyURL = 'http://' + Config.url + vidocracyPort + '/';
 
 	response.render('pages/host', {
-		code: newToble.code,
-		adminCode: newToble.adminCode,
+		code: newParty.code,
+		adminCode: newParty.adminCode,
 		url: {
-			toble: utobleURL + 'toble/' + newToble.code,
-			adminToble: utobleURL + 'toble/' + newToble.code + '/admin/' + newToble.adminCode,
-			mainScreen: utobleURL + 'toble/' + newToble.code + '/screen/' + newToble.adminCode,
-			userScreen: utobleURL + 'toble/' + newToble.code + '/screen/'
+			party: vidocracyURL + 'party/' + newParty.code,
+			adminParty: vidocracyURL + 'party/' + newParty.code + '/admin/' + newParty.adminCode,
+			mainScreen: vidocracyURL + 'party/' + newParty.code + '/screen/' + newParty.adminCode,
+			userScreen: vidocracyURL + 'party/' + newParty.code + '/screen/'
 		}
 	});
 });
@@ -74,18 +74,18 @@ app.get('/join', function(request, response) {
   response.render('pages/join');
 });
 
-app.get('/toble/:code', function(request, response) {
+app.get('/party/:code', function(request, response) {
 	var code = request.params.code;
-	var toble = utoble.getToble(code);
+	var party = vidocracy.getParty(code);
 
 	//grab the user's token from their cookies,
 	//	will be undefined if it does not exist
 	var userToken = request.cookies.token;
 
-	//if toble exists
-	if (toble !== null){
+	//if party exists
+	if (party !== null){
 		//this will return the existing user or a new user
-    	var thisUser = toble.getUser(userToken);
+    	var thisUser = party.getUser(userToken);
 
 		//set a cookie that will act as the user's login token
         response.cookie('id', thisUser.id, {
@@ -96,8 +96,8 @@ app.get('/toble/:code', function(request, response) {
             maxAge: 604800000 // Expires in one week
         });
 
-		response.render('pages/toble', {
-			code: toble.code,
+		response.render('pages/party', {
+			code: party.code,
 			googleapikey: Config.googleAPIKey
 		});
 	} else {
@@ -106,23 +106,23 @@ app.get('/toble/:code', function(request, response) {
 	}
 });
 
-app.get('/toble/:code/admin/:admincode', function(request, response) {
+app.get('/party/:code/admin/:admincode', function(request, response) {
 	//add the admin code to the users code, and 
-	//	redirect them to the toble page, which
+	//	redirect them to the party page, which
 	//	itself will check if the user is admin
 	var code = request.params.code;
 	var adminCode = request.params.admincode;
-	var toble = utoble.getToble(code);
+	var party = vidocracy.getParty(code);
 
-	//if toble exists and the admin code is correct
-	if (toble !== null && toble.adminCode === adminCode){
+	//if party exists and the admin code is correct
+	if (party !== null && party.adminCode === adminCode){
 
         response.cookie('admincode', adminCode, {
             maxAge: 604800000 // Expires in one week
         });
 
-        //redirect to toble page
-        response.redirect('/toble/' + code);
+        //redirect to party page
+        response.redirect('/party/' + code);
 
 	} else {
 		//send them back home
@@ -131,18 +131,18 @@ app.get('/toble/:code/admin/:admincode', function(request, response) {
 });
 
 //user screens
-app.get('/toble/:code/screen', function(request, response) {
+app.get('/party/:code/screen', function(request, response) {
 	var code = request.params.code;
-	var toble = utoble.getToble(code);
+	var party = vidocracy.getParty(code);
 
 	//grab the user's token from their cookies,
 	//	will be undefined if it does not exist
 	var userToken = request.cookies.screenToken;
 
-	//if toble exists
-	if (toble !== null) {
+	//if party exists
+	if (party !== null) {
 		//this will return the existing user or a new user
-    	var thisScreen = toble.getScreen(userToken);
+    	var thisScreen = party.getScreen(userToken);
 
 		//set a cookie that will act as the user's login token
         response.cookie('screenid', thisScreen.id, {
@@ -155,7 +155,7 @@ app.get('/toble/:code/screen', function(request, response) {
 
 		response.render('pages/screen', {
 			pageTitle: 'Screen',
-			code: toble.code,
+			code: party.code,
 			admincode: '',
 			googleapikey: Config.googleAPIKey
 		});
@@ -166,25 +166,25 @@ app.get('/toble/:code/screen', function(request, response) {
 });
 
 //main screen
-app.get('/toble/:code/screen/:admincode', function(request, response) {
+app.get('/party/:code/screen/:admincode', function(request, response) {
 	var code = request.params.code;
 	var adminCode = request.params.admincode;
-	var toble = utoble.getToble(code);
+	var party = vidocracy.getParty(code);
 
 	//we don't need to worry about screenTokens for the main screen
 	//	because their can be only one main screen, and it will be
 	//	authenticated by the admin code
 
 	//	AND no other main screen is currently connected
-	var isAnotherMainScreenNotConnected = (toble.mainScreen === null || !toble.mainScreen.socket.connected);
+	var isAnotherMainScreenNotConnected = (party.mainScreen === null || !party.mainScreen.socket.connected);
 
-	//if toble exists and the admin code is correct
-	if (toble !== null && toble.adminCode === adminCode && isAnotherMainScreenNotConnected) {
+	//if party exists and the admin code is correct
+	if (party !== null && party.adminCode === adminCode && isAnotherMainScreenNotConnected) {
 
 		response.render('pages/screen', {
 			pageTitle: 'Main Screen',
-			code: toble.code,
-			admincode: toble.adminCode,
+			code: party.code,
+			admincode: party.adminCode,
 			googleapikey: Config.googleAPIKey
 		});
 	} else {
@@ -194,7 +194,7 @@ app.get('/toble/:code/screen/:admincode', function(request, response) {
 });
 
 var server = app.listen(app.get('port'), function() {
-  console.log('Utoble is running on port', app.get('port'));
+  console.log('Vidocracy is running on port', app.get('port'));
 });
 
 //connect socket.io to the server
@@ -203,35 +203,35 @@ var io = socketio.listen(server);
 //handles users coming and going
 io.on('connection', function(socket) {
 
-	//client will send this when they join a valid toble
+	//client will send this when they join a valid party
 	socket.on('entrance', function(msg){
-		//we now must check that their toble is valid
-    	//check to see if the toble exists
-    	var thisToble = utoble.getToble(msg.tobleCode);
+		//we now must check that their party is valid
+    	//check to see if the party exists
+    	var thisParty = vidocracy.getParty(msg.partyCode);
 
     	//this will return the existing user or a new user
-    	var thisUser = thisToble.getUser(msg.user.token);
+    	var thisUser = thisParty.getUser(msg.user.token);
 
-    	if (thisToble !== null) {
+    	if (thisParty !== null) {
 
     		//attach the user's socket to their user object
     		thisUser.socket = socket;
 
     		//send the user the current queue
-    		thisToble.sendQueueToUser(thisUser);
+    		thisParty.sendQueueToUser(thisUser);
 
 		    socket.on('add', function(msg) {
 		    	//construct a new QueueItem from the one sent from the server
 		    	var qi = msg.data.queueItem;
-		    	thisToble.add(new QueueItem(qi.title, qi.type, qi.typeSpecific), msg.user.id);
+		    	thisParty.add(new QueueItem(qi.title, qi.type, qi.typeSpecific), msg.user.id);
 		    });
 
 		    socket.on('vote', function(msg) {
-		    	thisToble.vote(msg.data.queueItemID, msg.user.id);
+		    	thisParty.vote(msg.data.queueItemID, msg.user.id);
 		    });
 
 		    //now we'll check if this user is a valid admin
-		    if (msg.adminCode === thisToble.adminCode) {
+		    if (msg.adminCode === thisParty.adminCode) {
 
 		    	//tell the client that it is an admin, so
 		    	//	that it can display the admin tools
@@ -239,7 +239,7 @@ io.on('connection', function(socket) {
 
 				//add the admin only socket listeners
 			    socket.on('delete', function(msg) {
-			    	thisToble.delete(msg.data.queueItemID);
+			    	thisParty.delete(msg.data.queueItemID);
 			    });
 		    };
     	}
@@ -247,14 +247,14 @@ io.on('connection', function(socket) {
 
 	//user screen
 	socket.on('screenConnect', function(msg) {
-		//we now must check that their toble is valid
-    	//check to see if the toble exists
-    	var thisToble = utoble.getToble(msg.tobleCode);
+		//we now must check that their party is valid
+    	//check to see if the party exists
+    	var thisParty = vidocracy.getParty(msg.partyCode);
 
     	//this will return the existing user or a new user
-    	var thisUser = thisToble.getScreen(msg.screen.token);
+    	var thisUser = thisParty.getScreen(msg.screen.token);
 
-    	if (thisToble !== null) {
+    	if (thisParty !== null) {
 
     		//attach the user's socket to their user object
     		thisUser.socket = socket;
@@ -263,28 +263,28 @@ io.on('connection', function(socket) {
 
 	//main screen
 	socket.on('mainScreenConnect', function(msg) {
-		//we now must check that their toble is valid
-    	//check to see if the toble exists
-    	var thisToble = utoble.getToble(msg.tobleCode);
+		//we now must check that their party is valid
+    	//check to see if the party exists
+    	var thisParty = vidocracy.getParty(msg.partyCode);
 
     	var newMainScreen = new User();
 
     	//the admin code check has already been done by the express function
     	//	but we check again for security
-    	if (thisToble !== null && msg.adminCode === thisToble.adminCode) {
+    	if (thisParty !== null && msg.adminCode === thisParty.adminCode) {
 
     		//attach this screen's socket to it's user object
     		newMainScreen.socket = socket;
 
-    		//set this as the toble's new main screen
-    		thisToble.mainScreen = newMainScreen;
+    		//set this as the party's new main screen
+    		thisParty.mainScreen = newMainScreen;
 
     		//send the top video to our new main screen
-    		thisToble.queueNextItem();
+    		thisParty.queueNextItem();
 
     		//if the video ends, start the next one
 		    socket.on('videoEnd', function(msg) {
-		    	thisToble.queueNextItem();
+		    	thisParty.queueNextItem();
 		    });
     	}
 	})
@@ -292,25 +292,25 @@ io.on('connection', function(socket) {
 });
 
 
-function TobleManager() {
-	this.tobles = [];
+function PartyManager() {
+	this.partys = [];
 }
 
-TobleManager.prototype.newToble = function(){
-	var newToble = new Toble(this.getUniqueCode());
-	this.tobles.push(newToble);
-	return newToble;
+PartyManager.prototype.newParty = function(){
+	var newParty = new Party(this.getUniqueCode());
+	this.partys.push(newParty);
+	return newParty;
 }
 
-TobleManager.prototype.getUniqueCode = function(){
+PartyManager.prototype.getUniqueCode = function(){
 	var code;
 	var isUnique;
 	do {
 		isUnique = true;
 		code = fiveRandomLetters();
 		//compare generated code to each existing code
-		for (var i = this.tobles.length - 1; i >= 0; i--) {
-			if (this.tobles[i].code === code){
+		for (var i = this.partys.length - 1; i >= 0; i--) {
+			if (this.partys[i].code === code){
 				isUnique = false;
 				break;
 			}
@@ -321,18 +321,18 @@ TobleManager.prototype.getUniqueCode = function(){
 	return code;
 }
 
-TobleManager.prototype.getToble = function(code){
-	for (var i = this.tobles.length - 1; i >= 0; i--) {
-		if (this.tobles[i].code === code){
-			return this.tobles[i];
+PartyManager.prototype.getParty = function(code){
+	for (var i = this.partys.length - 1; i >= 0; i--) {
+		if (this.partys[i].code === code){
+			return this.partys[i];
 		}
 	}
-	//toble does not exist
+	//party does not exist
 	return null;
 }
 
 
-function Toble(uniqueCode) {
+function Party(uniqueCode) {
 	this.code = uniqueCode;
 
 	//does not need to be unique, so we can generate it right here
@@ -348,7 +348,7 @@ function Toble(uniqueCode) {
 	this.nowPlaying = new QueueItem('','empty','');
 }
 
-Toble.prototype.vote = function(queueItemID, userID) {
+Party.prototype.vote = function(queueItemID, userID) {
 	var tempQI = this.getQueueItem(queueItemID);
 	if(tempQI !== null){
 		tempQI.toggleVote(userID);
@@ -370,7 +370,7 @@ Toble.prototype.vote = function(queueItemID, userID) {
 	this.sendQueueToAll();
 }
 
-Toble.prototype.add = function(queueItem, userID) {
+Party.prototype.add = function(queueItem, userID) {
 	this.queue.push(queueItem);
 	console.log(queueItem.title + ' has been queued');
 
@@ -382,7 +382,7 @@ Toble.prototype.add = function(queueItem, userID) {
 	this.sendQueueToAll();
 }
 
-Toble.prototype.delete = function(queueItemID) {
+Party.prototype.delete = function(queueItemID) {
 	var tempQI = this.getQueueItem(queueItemID);
 	if(tempQI !== null){
 		//remove it
@@ -397,7 +397,7 @@ Toble.prototype.delete = function(queueItemID) {
 	this.sendQueueToAll();
 }
 
-Toble.prototype.sortQueue = function() {
+Party.prototype.sortQueue = function() {
 	//sorts by greatest to least number of votes
 	this.queue.sort(function(a, b) {
 		if (a.votes > b.votes) {
@@ -415,7 +415,7 @@ Toble.prototype.sortQueue = function() {
 	}
 }
 
-Toble.prototype.getQueueItem = function(queueItemID) {
+Party.prototype.getQueueItem = function(queueItemID) {
 	for (var i = this.queue.length - 1; i >= 0; i--) {
 		if (this.queue[i].id === queueItemID){
 			return this.queue[i];
@@ -427,7 +427,7 @@ Toble.prototype.getQueueItem = function(queueItemID) {
 
 //if the user already exists, it will return that one,
 //	otherwise it will create a new user and return that.
-Toble.prototype.getUser = function(userToken){
+Party.prototype.getUser = function(userToken){
 	for (var i = this.users.length - 1; i >= 0; i--) {
 		if (this.users[i].token === userToken){
 			return this.users[i];
@@ -442,7 +442,7 @@ Toble.prototype.getUser = function(userToken){
 
 //if the user already exists, it will return that one,
 //	otherwise it will create a new user and return that.
-Toble.prototype.getScreen = function(screenToken){
+Party.prototype.getScreen = function(screenToken){
 	for (var i = this.screens.length - 1; i >= 0; i--) {
 		if (this.screens[i].token === screenToken){
 			return this.screens[i];
@@ -456,7 +456,7 @@ Toble.prototype.getScreen = function(screenToken){
 	return newUser;	
 }
 
-Toble.prototype.sendVideoToScreens = function(queueItem) {
+Party.prototype.sendVideoToScreens = function(queueItem) {
 	//first, send it to the main screen, if it is connected
 	if (this.mainScreen !== null && this.mainScreen.socket.connected) {
 		this.sendVideoToScreen(queueItem, this.mainScreen);
@@ -468,7 +468,7 @@ Toble.prototype.sendVideoToScreens = function(queueItem) {
 	};
 }
 
-Toble.prototype.sendVideoToScreen = function(queueItem, screenUser) {
+Party.prototype.sendVideoToScreen = function(queueItem, screenUser) {
 	var userSocket = screenUser.socket;
 
 	//check to make sure that the screen is online
@@ -480,14 +480,14 @@ Toble.prototype.sendVideoToScreen = function(queueItem, screenUser) {
 	}
 }
 
-Toble.prototype.sendQueueToAll = function() {
+Party.prototype.sendQueueToAll = function() {
 	for (var i = this.users.length - 1; i >= 0; i--) {
 		this.sendQueueToUser(this.users[i]);
 	}
 }
 
-//does NOT check to see if the user exists in this toble
-Toble.prototype.sendQueueToUser = function(user) {
+//does NOT check to see if the user exists in this party
+Party.prototype.sendQueueToUser = function(user) {
 	var userSocket = user.socket;
 
 	//check to make sure that the user is online
@@ -500,7 +500,7 @@ Toble.prototype.sendQueueToUser = function(user) {
 	}
 }
 
-Toble.prototype.queueNextItem = function() {
+Party.prototype.queueNextItem = function() {
 
 	var isMainScreenConnected = (this.mainScreen !== null && this.mainScreen.socket.connected);
 

@@ -1,5 +1,5 @@
 /*
-  Utoble User Config
+  Vidocracy User Config
   Uncomment out the lines your would like to override.
 */
 

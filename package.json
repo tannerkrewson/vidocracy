@@ -1,7 +1,7 @@
 {
-  "name": "utoble",
+  "name": "vidocracy",
   "version": "0.0.1",
-  "description": "utoble",
+  "description": "vidocracy",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
@@ -14,13 +14,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tannerkrewson/utoble.git"
+    "url": "git+https://github.com/tannerkrewson/vidocracy.git"
   },
   "author": "Tanner Krewson",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/tannerkrewson/utoble/issues"
+    "url": "https://github.com/tannerkrewson/vidocracy/issues"
   },
-  "homepage": "https://github.com/tannerkrewson/utoble#readme",
+  "homepage": "https://github.com/tannerkrewson/vidocracy#readme",
   "devDependencies": {}
 }

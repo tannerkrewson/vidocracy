@@ -42,7 +42,7 @@ function SendToServer() {}
 
 SendToServer.generic = function(event, data){
     socket.emit(event, {
-        tobleCode: $('#toblecode').html(),
+        partyCode: $('#partycode').html(),
         adminCode: Cookies.get('admincode'),
         user: {
           id: Cookies.get('id'),
@@ -261,29 +261,29 @@ $('#searchinput').on('keyup', function() {
 
 //Main Code
 
-var tobleQueue = new Queue();
+var partyQueue = new Queue();
 
 SendToServer.entrance();
 
 socket.on('queue', function(msg) {
-  tobleQueue.populateQueue(msg.queue);
-  tobleQueue.setNowPlaying(msg.nowPlaying);
+  partyQueue.populateQueue(msg.queue);
+  partyQueue.setNowPlaying(msg.nowPlaying);
 
-  tobleQueue.displayQueue();
+  partyQueue.displayQueue();
 });
 
 //this will be sent if the server determines that this
-//  user is a valid admin for this toble
+//  user is a valid admin for this party
 socket.on('admin', function(msg) {
   console.log('Admin Code: ' + Cookies.get('admincode'))
   isAdmin = true;
 
   //visual cue that this page is an admin page
-  $('#subtitle h1').html('Your Toble (Admin)');
+  $('#subtitle h1').html('Your Party (Admin)');
 
   //we do this so that the admin tools will show up on the queue
   //  otherwise they won't show up until the queue is displayed
   //  again
-  tobleQueue.displayQueue();
+  partyQueue.displayQueue();
 });
 
