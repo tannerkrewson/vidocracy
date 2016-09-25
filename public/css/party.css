@@ -20,6 +20,12 @@ table {
   right: 15px;
 }
 
+.gamecode {
+    font-family: monospace;
+    box-shadow: 0 0 10pt 1pt LightGrey;
+    padding: 5px;
+}
+
 #nowplaying .glyphicon {
   width: 14px;
   padding-right: 27px;

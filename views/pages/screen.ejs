@@ -11,10 +11,13 @@
   <div class="container">
   </br></br></br>
     <div class="row">
-    
+
       <div id="subtitle">
         <h1><%= pageTitle%></h1>
-        <h3>Party Code: <%= code%></h3>
+        <h3>To join, go to <%= url%> and enter the code:
+          <span class="gamecode"><%= code%></span>
+        </h3>
+        <br/>
         <div id="waitingmessage">
           <br/><br/><br/><br/>
           <h1>Waiting for next item...</h1>
@@ -24,7 +27,7 @@
       <div class="embed-responsive embed-responsive-16by9">
         <div id="player" style="display:none;"></div>
       </div>
-      
+
     </div>
 
   </br></br></br>
@@ -33,7 +36,7 @@
   <div id="partycode" style="display: none;"><%= code%></div>
   <div id="admincode" style="display: none;"><%= admincode%></div>
   <div id="googleapikey" style="display: none;"><%= googleapikey%></div>
-
+  <link rel="stylesheet" type="text/css" href="/css/party.css" />
   <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/js-cookie/2.1.1/js.cookie.min.js"></script>
   <script src="/js/screen.js"></script>

@@ -13,7 +13,9 @@
     <div class="row">
       <div id="subtitle">
         <h1>Your Party</h1>
-        <h3>Party Code: <%= code%></h3>
+        <h4>To join, go to <%= url%> and enter the code: 
+          <span class="gamecode"><%= code%></span>
+        </h4>
       </div></br>
       <div class="col-md-6">
         <div class="list-group">
@@ -21,12 +23,12 @@
             <table>
               <tr>
                 <td><i class="glyphicon glyphicon-search"></i></td>
-                <td><input type="text" class="form-control" id="searchinput" placeholder="Search for a video or song..." /></td> 
+                <td><input type="text" class="form-control" id="searchinput" placeholder="Search YouTube for a video or song..." /></td>
               </tr>
             </table>
           </div>
           <div id="searchresults">
-          
+
           </div>
         </div>
       </div>

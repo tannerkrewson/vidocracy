@@ -45,23 +45,23 @@ app.use(express.static(__dirname + '/public'));
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
 
+//if its 80, leave it blank, because browsers do that for you
+const vidocracyPort = Config.port === 80 || Config.port === process.env.PORT ? '' : ':' + Config.port;
+
+const vidocracyURL = Config.url + vidocracyPort;
+
 app.get('/host', function(request, response) {
 	//create a new party
 	var newParty = vidocracy.newParty();
-
-	//if its 80, leave it blank, because browsers do that for you
-	var vidocracyPort = Config.port === 80 || Config.port === process.env.PORT ? '' : ':' + Config.port;
-
-	var vidocracyURL = 'http://' + Config.url + vidocracyPort + '/';
 
 	response.render('pages/host', {
 		code: newParty.code,
 		adminCode: newParty.adminCode,
 		url: {
-			party: vidocracyURL + 'party/' + newParty.code,
-			adminParty: vidocracyURL + 'party/' + newParty.code + '/admin/' + newParty.adminCode,
-			mainScreen: vidocracyURL + 'party/' + newParty.code + '/screen/' + newParty.adminCode,
-			userScreen: vidocracyURL + 'party/' + newParty.code + '/screen/'
+			party: vidocracyURL + '/party/' + newParty.code,
+			adminParty: vidocracyURL + '/party/' + newParty.code + '/admin/' + newParty.adminCode,
+			mainScreen: vidocracyURL + '/party/' + newParty.code + '/screen/' + newParty.adminCode,
+			userScreen: vidocracyURL + '/party/' + newParty.code + '/screen/'
 		}
 	});
 });
@@ -98,7 +98,8 @@ app.get('/party/:code', function(request, response) {
 
 		response.render('pages/party', {
 			code: party.code,
-			googleapikey: Config.googleAPIKey
+			googleapikey: Config.googleAPIKey,
+      url: vidocracyURL
 		});
 	} else {
 		//send them back home
@@ -107,7 +108,7 @@ app.get('/party/:code', function(request, response) {
 });
 
 app.get('/party/:code/admin/:admincode', function(request, response) {
-	//add the admin code to the users code, and 
+	//add the admin code to the users code, and
 	//	redirect them to the party page, which
 	//	itself will check if the user is admin
 	var code = request.params.code;
@@ -157,7 +158,8 @@ app.get('/party/:code/screen', function(request, response) {
 			pageTitle: 'Screen',
 			code: party.code,
 			admincode: '',
-			googleapikey: Config.googleAPIKey
+			googleapikey: Config.googleAPIKey,
+      url: vidocracyURL
 		});
 	} else {
 		//send them back home
@@ -185,7 +187,8 @@ app.get('/party/:code/screen/:admincode', function(request, response) {
 			pageTitle: 'Main Screen',
 			code: party.code,
 			admincode: party.adminCode,
-			googleapikey: Config.googleAPIKey
+			googleapikey: Config.googleAPIKey,
+      url: vidocracyURL
 		});
 	} else {
 		//send them back home
@@ -422,7 +425,7 @@ Party.prototype.getQueueItem = function(queueItemID) {
 		}
 	}
 	//queueitem does not exist
-	return null;	
+	return null;
 }
 
 //if the user already exists, it will return that one,
@@ -437,7 +440,7 @@ Party.prototype.getUser = function(userToken){
 	//user does not exist, so lets make a new one
 	var newUser = new User();
 	this.users.push(newUser);
-	return newUser;	
+	return newUser;
 }
 
 //if the user already exists, it will return that one,
@@ -453,7 +456,7 @@ Party.prototype.getScreen = function(screenToken){
 	//screens are just special users
 	var newUser = new User();
 	this.screens.push(newUser);
-	return newUser;	
+	return newUser;
 }
 
 Party.prototype.sendVideoToScreens = function(queueItem) {
@@ -520,7 +523,7 @@ Party.prototype.queueNextItem = function() {
 	} else {
 		this.nowPlaying = new QueueItem('','empty','');
 	}
-	
+
 }
 
 
